@@ -9,7 +9,9 @@ pysam is acting weird so have to create a separate env
 
 
 # Align to human genome (roughly) and filter out aligned reads
-`bowtie2 -p 10 --very-fast -x GRCh38_noalt_as/GRCh38_noalt_as -1 U2OS-LacO-TetO_R1_paired.fastq.gz -2 U2OS-LacO-TetO_R2_paired.fastq.gz -S mu.sam`
+```
+bowtie2 -p 10 --very-fast -x GRCh38_noalt_as/GRCh38_noalt_as -1 U2OS-LacO-TetO_R1_paired.fastq.gz -2 U2OS-LacO-TetO_R2_paired.fastq.gz -S mu.sam
+```
 ```
 373498309 reads; of these:
   373498309 (100.00%) were paired; of these:
@@ -32,13 +34,10 @@ pysam is acting weird so have to create a separate env
 samtools view -@ 10 -b -o mu.bam mu.sam
 samtools sort -@ 10 -o mu.sorted.bam mu.bam
 samtools index -@ 10 mu.sorted.bam
+python filter.py
+samtools collate -@ 10 -o filtered_collate.bam filtered.bam
+samtools fastq -@ 10 -1 filtered_R1.fastq.gz -2 filtered_R2.fastq.gz -0 filtered_0.fastq -s filtered_single.fastq filtered_collate.bam
 ```
-
-`python filter.py`
-
-`samtools collate -@ 10 -o filtered_collate.bam filtered.bam`
-
-`samtools fastq -@ 10 -1 filtered_R1.fastq.gz -2 filtered_R2.fastq.gz -0 filtered_0.fastq -s filtered_single.fastq filtered_collate.bam`
 ```
 [M::bam2fq_mainloop] discarded 0 singletons
 [M::bam2fq_mainloop] processed 7797180 reads
@@ -47,7 +46,9 @@ filtered_0.fastq and filtered_single.fastq are empty
 
 
 # Align to human genome again (failed, too many candidates)
-`bowtie2 -p 10 --local --very-sensitive-local -x GRCh38_noalt_as/GRCh38_noalt_as -1 filtered_R1.fastq.gz -2 filtered_R2.fastq.gz -S final.sam`
+```
+bowtie2 -p 10 --local --very-sensitive-local -x GRCh38_noalt_as/GRCh38_noalt_as -1 filtered_R1.fastq.gz -2 filtered_R2.fastq.gz -S final.sam
+```
 ```
 3898590 reads; of these:
   3898590 (100.00%) were paired; of these:
@@ -70,17 +71,18 @@ filtered_0.fastq and filtered_single.fastq are empty
 samtools view -@ 10 -b -o final.bam final.sam
 samtools sort -@ 10 -o final.sorted.bam final.bam
 samtools index -@ 10 final.sorted.bam
+python analysis.py
+samtools index -@ 10 candidates.bam
 ```
-
-`python analysis.py`
-
-`samtools index -@ 10 candidates.bam`
 
 
 # Align to plasmid (laco-i-scei-teto_curated.fasta)
-`bowtie2-build plasmid/laco-i-scei-teto_curated.fasta plasmid/plasmid`
-
-`bowtie2 -p 10 --local --very-sensitive-local -x plasmid/plasmid -1 filtered_R1.fastq.gz -2 filtered_R2.fastq.gz -S final.sam`
+```
+bowtie2-build plasmid/laco-i-scei-teto_curated.fasta plasmid/plasmid
+```
+```
+bowtie2 -p 10 --local --very-sensitive-local -x plasmid/plasmid -1 filtered_R1.fastq.gz -2 filtered_R2.fastq.gz -S final.sam
+```
 ```
 3898590 reads; of these:
   3898590 (100.00%) were paired; of these:
@@ -103,19 +105,20 @@ samtools index -@ 10 final.sorted.bam
 samtools view -@ 10 -b -o final.bam final.sam
 samtools sort -@ 10 -o final.sorted.bam final.bam
 samtools index -@ 10 final.sorted.bam
+python analysis.py
+samtools index -@ 10 candidates.bam
 ```
-
-`python analysis.py`
-
-`samtools index -@ 10 candidates.bam`
 
 ## Results
 Found 8 candidate sequences (eyeballing soft-clip.txt and candidates.bam on IGV)
 
 ### Local BLAST against plasmid
-`makeblastdb -in plasmid/laco-i-scei-teto_curated.fasta -dbtype nucl -out plasmid/plasmid`
-
-`blastn -db plasmid/plasmid -query BLAST/blast_in.fasta -out BLAST/blast_out.txt -task blastn-short`
+```
+makeblastdb -in plasmid/laco-i-scei-teto_curated.fasta -dbtype nucl -out plasmid/plasmid
+```
+```
+blastn -db plasmid/plasmid -query BLAST/blast_in.fasta -out BLAST/blast_out.txt -task blastn-short
+```
 4 sequences are from plasmid
 
 ### BLAST the other 4 sequences against human ([NCBI online BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome))
