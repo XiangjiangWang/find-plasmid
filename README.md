@@ -114,6 +114,7 @@ Found 8 candidate sequences (eyeballing soft-clip.txt and candidates.bam on IGV)
 
 ### Local BLAST against plasmid
 `makeblastdb -in plasmid/laco-i-scei-teto_curated.fasta -dbtype nucl -out plasmid/plasmid`
+
 `blastn -db plasmid/plasmid -query BLAST/blast_in.fasta -out BLAST/blast_out.txt -task blastn-short`
 4 sequences are from plasmid
 
