@@ -1,11 +1,15 @@
 # Setup environment
 ## Bowtie2
-`conda create -n bt2 bowtie2`
+```
+conda create -n bt2 bowtie2
+```
 ## samtools
 [Build from source](http://www.htslib.org/download/)
 ## pysam
 pysam is acting weird so have to create a separate env
-`conda create -n ngs pysam=0.20 tqdm`
+```
+conda create -n ngs pysam=0.20 tqdm
+```
 
 
 # Align to human genome (roughly) and filter out aligned reads
