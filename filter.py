@@ -16,3 +16,5 @@ for read in tqdm(samfile1.fetch(until_eof=True)):
     else:
         # read.is_unmapped
         samfile2.write(read)
+samfile1.close()
+samfile2.close()
